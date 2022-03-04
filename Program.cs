@@ -12,21 +12,22 @@ namespace Memory
     {
         static void Main(string[] args)
         {
+
+            Console.SetWindowSize(76, 30);
             Console.ForegroundColor = ConsoleColor.White;
             Console.BackgroundColor = ConsoleColor.DarkBlue;
             Dictionary<string, Slot> slots = new();
 
 
             string[] allwords = File.ReadAllLines("words.txt");
-            Random rand = new Random();
+            Random rand = new();
 
-            List<string> words = new List<string>();
-
-
+            List<string> words = new();
 
             while (true)
             {
                 Console.Clear();
+                AsciiArt();
                 Console.WriteLine("\n\t\t\tWelcome to the game of Memory");
                 Console.WriteLine("\t\tWant to play the easy version or the hard version?");
                 int howMany = 0;
@@ -55,7 +56,7 @@ namespace Memory
 
                 }
 
-                Stopwatch howLong = new Stopwatch();
+                Stopwatch howLong = new();
                 howLong.Start();
                 while (words.Count < 8 * howMany)
                 {
@@ -192,7 +193,8 @@ namespace Memory
                 if (result) //win
                 {
                     Console.Clear();
-                    Console.WriteLine("\t\t1\t\t2\t\t3\t\t4");
+                    Console.WriteLine("\n\t\t1\t\t2\t\t3\t\t4");
+                    Console.Write("\t|---------------|---------------|---------------|---------------|\n");
                     for (int j = 0; j < 2 * howMany; j++)
                     {
                         char literka = (char)('a' + j);
@@ -204,7 +206,8 @@ namespace Memory
                     slots.Clear();
                     DateTime time = DateTime.Now;
                     Console.WriteLine("\t\tCongrats, you won! It took you {0:hh\\:mm\\:ss} and " + count + " tries.", howLong.Elapsed);
-                    Console.WriteLine("\t\t\t\tWhat is your name?");
+                    Console.Write("\t\t\t\tWhat is your name?\n\t\t\t");
+                    
                     string name = Console.ReadLine();
                     StreamWriter highscore = File.AppendText("highscores.txt");
                     if(howMany==1)
@@ -216,7 +219,12 @@ namespace Memory
 
                     Console.WriteLine("\n\t\t\t\tHighscores:");
                     string[] highscores = File.ReadAllLines("highscores.txt");
-                    string[] bestTen = new string[10];
+                    int length;
+                    if (highscores.Length < 10)
+                        length = highscores.Length;
+                    else
+                        length = 10;
+                        string[] bestTen = new string[length];
 
                     //highscore
                     string help;
@@ -282,6 +290,8 @@ namespace Memory
 
                     string[] highscores = File.ReadAllLines("highscores.txt");
                     Console.WriteLine("\n\n\t\t\t\tHighscores");
+
+                    Console.WriteLine("\t\tName | Mode | Date | Guessing time | Tries");
                     for (int i = 0; i < highscores.Length; i++)
                     {
                         if (highscores[i] == null) break;
@@ -311,6 +321,27 @@ namespace Memory
 
             }
         }
+
+        public static void AsciiArt()
+        {
+
+            Console.WriteLine("\t\t ___ ___    ___  ___ ___   ___   ____   __ __");
+            Console.WriteLine("\t\t|   |   |  /  _]|   |   | /   " + (char)92 + " |    " + (char)92 + " |  |  |");
+            Console.WriteLine("\t\t| _   _ | /  [_ | _   _ ||     ||  D  )|  |  |");
+            Console.WriteLine("\t\t|  " + (char)92 + "_/  ||    _]|  " + (char)92 + "_/  ||  O  ||    / |  ~  |");
+            Console.WriteLine("\t\t|   |   ||   [_ |   |   ||     ||    " + (char)92 + " |___, |");
+            Console.WriteLine("\t\t|   |   ||     ||   |   ||     ||  .  " + (char)92 + "|     |");
+            Console.WriteLine("\t\t|___|___||_____||___|___| " + (char)92 + "___/ |__|" + (char)92 + "_||____/");
+            Console.WriteLine("");
+            Console.WriteLine("");
+            Console.WriteLine("\t\t          ____   ____  ___ ___    ___ ");
+            Console.WriteLine("\t\t         /    | /    ||   |   |  /  _]");
+            Console.WriteLine("\t\t        |   __||  o  || _   _ | /  [_ ");
+            Console.WriteLine("\t\t        |  |  ||     ||  " + (char)92+"_/  ||    _]");
+            Console.WriteLine("\t\t        |  |_ ||  _  ||   |   ||   [_ ");
+            Console.WriteLine("\t\t        |     ||  |  ||   |   ||     |");
+            Console.WriteLine("\t\t        |___,_||__|__||___|___||_____|");
+        }
     }
 
 
@@ -332,21 +363,14 @@ namespace Memory
                 return "XXXXXXXXXXXXXXX";
             }
 
-            switch(word.Length)
+            return word.Length switch
             {
-                case < 4:
-                    return ("      " + word + "\t");
-                case < 6:
-                    return ("     " + word + "\t");
-                case < 9:
-                    return ("   " + word + "\t");
-                case < 11:
-                    return ("  " + word + "\t");
-                default:
-                    return ("" + word + "\t");
-
-            }
-
+                < 4 => ("      " + word + "\t"),
+                < 6 => ("     " + word + "\t"),
+                < 9 => ("    " + word + "\t"),
+                < 11 => ("   " + word + "\t"),
+                _ => ("" + word + "\t"),
+            };
         }
 
         public void Change()
