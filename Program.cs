@@ -209,7 +209,11 @@ namespace Memory
                     Console.Write("\t\t\t\tWhat is your name?\n\t\t\t");
                     
                     string name = Console.ReadLine();
-                    StreamWriter highscore = File.AppendText("highscores.txt");
+                    string modescores;
+                    if (howMany == 1)
+                        modescores = "scoreseasy.txt";
+                    else modescores = "scoreshard.txt";
+                    StreamWriter highscore = File.AppendText(modescores);
                     if(howMany==1)
                     highscore.WriteLine(name + " | Easy | " + time + " | {0:hh\\:mm\\:ss} | " + count, howLong.Elapsed);
                     else
@@ -218,7 +222,8 @@ namespace Memory
 
 
                     Console.WriteLine("\n\t\t\t\tHighscores:");
-                    string[] highscores = File.ReadAllLines("highscores.txt");
+                    Console.WriteLine("\t\tName | Mode | Date | Guessing time | Tries");
+                    string[] highscores = File.ReadAllLines(modescores);
                     int length;
                     if (highscores.Length < 10)
                         length = highscores.Length;
@@ -259,7 +264,7 @@ namespace Memory
                         if (bestTen[i] == null) break;
                         Console.WriteLine("\t{0}" + ". " + bestTen[i], i + 1);
                     }
-                    File.WriteAllLines("highscores.txt", bestTen);
+                    File.WriteAllLines(modescores, bestTen);
 
 
                     Console.WriteLine("\n\tHow about one more game? Answer that with 'yes' or 'no'.");
@@ -287,8 +292,11 @@ namespace Memory
                 }
                 else //lose
                 {
-
-                    string[] highscores = File.ReadAllLines("highscores.txt");
+                    string modescores;
+                    if (howMany == 1)
+                        modescores = "scoreseasy.txt";
+                    else modescores = "scoreshard.txt";
+                    string[] highscores = File.ReadAllLines(modescores);
                     Console.WriteLine("\n\n\t\t\t\tHighscores");
 
                     Console.WriteLine("\t\tName | Mode | Date | Guessing time | Tries");
