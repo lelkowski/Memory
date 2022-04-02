@@ -12,24 +12,25 @@ namespace Memory
     {
         static void Main(string[] args)
         {
-
             Console.SetWindowSize(76, 30);
             Console.ForegroundColor = ConsoleColor.White;
             Console.BackgroundColor = ConsoleColor.DarkBlue;
             Dictionary<string, Slot> slots = new();
 
-
+            //Loading words
             string[] allwords = File.ReadAllLines("words.txt");
             Random rand = new();
 
             List<string> words = new();
+            bool started = true;
 
-            while (true)
+            while (started)
             {
                 Console.Clear();
                 AsciiArt();
                 Console.WriteLine("\n\t\t\tWelcome to the game of Memory");
                 Console.WriteLine("\t\tWant to play the easy version or the hard version?");
+                //Choosing mode of game
                 int howMany = 0;
                 int lifes = 0;
                 while (howMany == 0)
@@ -51,20 +52,21 @@ namespace Memory
                         default:
                             Console.WriteLine("\t\tSomething went wrong, try writing ''easy'' or ''hard''.");
                             break;
-
                     }
-
                 }
 
+                
                 Stopwatch howLong = new();
                 howLong.Start();
+
+                //Selecting words
                 while (words.Count < 8 * howMany)
                 {
                     string word = allwords[rand.Next(allwords.Length)];
                     if (!words.Contains(word)) { words.Add(word); words.Add(word); }
                 }
 
-
+                //Randomizing placement of words in slots
                 for (int i = 0; i < 2 * howMany; i++)
                 {
                     for (int j = 1; j < 5; j++)
@@ -75,6 +77,8 @@ namespace Memory
                         words.RemoveAt(x);
                     }
                 }
+
+
                 int toBeat = howMany * 4;
                 int chances = 2;
                 int count = 1;
@@ -82,22 +86,15 @@ namespace Memory
                 string chosenSlot = "";
                 bool playing = true;
                 bool result = false;
+
+
                 while (playing)
                 {
-                    Console.Clear();
-                    Console.WriteLine("\n\t\t1\t\t2\t\t3\t\t4");
-                    Console.Write("\t|---------------|---------------|---------------|---------------|\n");
-                    for (int j = 0; j < 2 * howMany; j++)
-                    {
-                        char literka = (char)('a' + j);
-                        string first = "" + literka + 1, second = "" + literka + 2, third = "" + literka + 3, fourth = "" + literka + 4;
-                        Console.Write("   " + literka + "\t|" + slots[first].Status() + "|" + slots[second].Status() + "|" + slots[third].Status() + "|" + slots[fourth].Status() + "|\n");
-                        Console.Write("\t|---------------|---------------|---------------|---------------|\n");
-                    }
+                    PrintSlots(slots, howMany);
                     Console.WriteLine("\n      Choose slot by writing it's coordinates, for example: 'a1' or 'b3'.");
                     switch (chances)
                     {
-                        case 0:
+                        case 0: //Player missed, subtracting his chances 
                             {
                                 count++;
                                 lifes--;
@@ -109,7 +106,7 @@ namespace Memory
                                 chances = 2;
                             }
                             break;
-                        case 1:
+                        case 1: //Player choosed his first slot, now choosing another
 
                             Console.Write("\t\t\t\t    ");
                             chosenSlot = Console.ReadLine().ToLower();
@@ -141,17 +138,7 @@ namespace Memory
                                     {
                                         slots[chosenSlot].Change();
 
-                                        Console.Clear();
-                                        Console.WriteLine("\n\t\t1\t\t2\t\t3\t\t4");
-                                        Console.Write("\t|---------------|---------------|---------------|---------------|\n");
-                                        for (int j = 0; j < 2 * howMany; j++)
-                                        {
-                                            char literka = (char)('a' + j);
-                                            string first = "" + literka + 1, second = "" + literka + 2, third = "" + literka + 3, fourth = "" + literka + 4;
-                                            Console.Write("   " + literka + "\t|" + slots[first].Status() + "|" + slots[second].Status() + "|" + slots[third].Status() + "|" + slots[fourth].Status() + "|\n");
-                                            Console.Write("\t|---------------|---------------|---------------|---------------|\n");
-                                        }
-
+                                        PrintSlots(slots, howMany);
                                         Console.WriteLine("\n\t\t  Sorry, you missed. You have " + (lifes - 1) + " more chances.");
                                         System.Threading.Thread.Sleep(2000);
 
@@ -162,7 +149,7 @@ namespace Memory
                                     break;
                             }
                             break;
-                        case 2:
+                        case 2: //Player chooses first slot
 
                             Console.Write("\t\t\t\t    ");
                             chosenSlot = Console.ReadLine().ToLower();
@@ -190,29 +177,23 @@ namespace Memory
 
                 }
                 howLong.Stop();
-                if (result) //win
+
+                string modescores;
+                if (howMany == 1)
+                    modescores = "scoreseasy.txt";
+                else modescores = "scoreshard.txt";
+                if (result) //Win
                 {
-                    Console.Clear();
-                    Console.WriteLine("\n\t\t1\t\t2\t\t3\t\t4");
-                    Console.Write("\t|---------------|---------------|---------------|---------------|\n");
-                    for (int j = 0; j < 2 * howMany; j++)
-                    {
-                        char literka = (char)('a' + j);
-                        string first = "" + literka + 1, second = "" + literka + 2, third = "" + literka + 3, fourth = "" + literka + 4;
-                        Console.Write("   " + literka + "\t|" + slots[first].Status() + "|" + slots[second].Status() + "|" + slots[third].Status() + "|" + slots[fourth].Status() + "|\n");
-                        Console.Write("\t|---------------|---------------|---------------|---------------|\n");
-                    }
+                    PrintSlots(slots, howMany);
 
                     slots.Clear();
                     DateTime time = DateTime.Now;
                     Console.WriteLine("\t\tCongrats, you won! It took you {0:hh\\:mm\\:ss} and " + count + " tries.", howLong.Elapsed);
                     Console.Write("\t\t\t\tWhat is your name?\n\t\t\t");
                     
+
+                    //Adding name to highscore
                     string name = Console.ReadLine();
-                    string modescores;
-                    if (howMany == 1)
-                        modescores = "scoreseasy.txt";
-                    else modescores = "scoreshard.txt";
                     StreamWriter highscore = File.AppendText(modescores);
                     if(howMany==1)
                     highscore.WriteLine(name + " | Easy | " + time + " | {0:hh\\:mm\\:ss} | " + count, howLong.Elapsed);
@@ -221,8 +202,7 @@ namespace Memory
                     highscore.Close();
 
 
-                    Console.WriteLine("\n\t\t\t\tHighscores:");
-                    Console.WriteLine("\t\tName | Mode | Date | Guessing time | Tries");
+                    //Saving best ten scores
                     string[] highscores = File.ReadAllLines(modescores);
                     int length;
                     if (highscores.Length < 10)
@@ -230,40 +210,10 @@ namespace Memory
                     else
                         length = 10;
                         string[] bestTen = new string[length];
-
-                    //highscore
-                    string help;
-                    for (int i = 0; i < highscores.Length; i++)
-                    {
-                        string next = highscores[i];
-                        for (int j = 0; j < bestTen.Length; j++)
-                        {
-                            if (bestTen[j] == null)
-                            {
-                                bestTen[j] = next;
-                                break;
-                            }
-                            else
-                            {
-                                int newScore = int.Parse(next.Substring(next.LastIndexOf(" | ") + 2));
-                                int oldScore = int.Parse(bestTen[j].Substring(bestTen[j].LastIndexOf(" | ") + 2));
-                                if (newScore < oldScore)
-                                {
-                                    help = bestTen[j];
-                                    bestTen[j] = next;
-                                    next = help;
-                                }
-                            }
+                    Highscores.CheckForBestTen(highscores, bestTen);
 
 
-                        }
-
-                    }
-                    for (int i = 0; i < bestTen.Length; i++)
-                    {
-                        if (bestTen[i] == null) break;
-                        Console.WriteLine("\t{0}" + ". " + bestTen[i], i + 1);
-                    }
+                    Highscores.Print(bestTen);
                     File.WriteAllLines(modescores, bestTen);
 
 
@@ -285,26 +235,13 @@ namespace Memory
                                 Console.WriteLine("\n\t\t\tAnswer with 'yes' or 'no'.");
                                 break;
                         }
-
                     }
-
-
                 }
-                else //lose
+                else //Lose
                 {
-                    string modescores;
-                    if (howMany == 1)
-                        modescores = "scoreseasy.txt";
-                    else modescores = "scoreshard.txt";
                     string[] highscores = File.ReadAllLines(modescores);
-                    Console.WriteLine("\n\n\t\t\t\tHighscores");
+                    Highscores.Print(highscores);
 
-                    Console.WriteLine("\t\tName | Mode | Date | Guessing time | Tries");
-                    for (int i = 0; i < highscores.Length; i++)
-                    {
-                        if (highscores[i] == null) break;
-                        Console.WriteLine("\t{0}" + ". " + highscores[i], i + 1);
-                    }
                     Console.WriteLine("\n\t\tUnfortunately, you didn't make it this time. \n\t\t\tDo you want to try again?");
                     bool another = true;
                     while (another)
@@ -322,11 +259,24 @@ namespace Memory
                                 Console.WriteLine("\n\t\t\tAnswer with 'yes' or 'no'.");
                                 break;
                         }
-
                     }
                 }
 
 
+            }
+
+            static void PrintSlots(Dictionary<string, Slot> slots, int howMany)
+            {
+                Console.Clear();
+                Console.WriteLine("\n\t\t1\t\t2\t\t3\t\t4");
+                Console.Write("\t|---------------|---------------|---------------|---------------|\n");
+                for (int j = 0; j < 2 * howMany; j++)
+                {
+                    char literka = (char)('a' + j);
+                    string first = "" + literka + 1, second = "" + literka + 2, third = "" + literka + 3, fourth = "" + literka + 4;
+                    Console.Write("   " + literka + "\t|" + slots[first].Status() + "|" + slots[second].Status() + "|" + slots[third].Status() + "|" + slots[fourth].Status() + "|\n");
+                    Console.Write("\t|---------------|---------------|---------------|---------------|\n");
+                }
             }
         }
 
@@ -353,6 +303,47 @@ namespace Memory
     }
 
 
+    static class Highscores
+    {
+        public static void Print(string[] highscores)
+        {
+            Console.WriteLine("\n\n\t\t\t\tHighscores");
+            Console.WriteLine("\t\tName | Mode | Date | Guessing time | Tries");
+            for (int i = 0; i < highscores.Length; i++)
+            {
+                if (highscores[i] == null) break;
+                Console.WriteLine("\t{0}" + ". " + highscores[i], i + 1);
+            }
+        }
+
+        public static void CheckForBestTen(string[] highscores, string[] bestTen)
+        {
+            string help;
+            for (int i = 0; i < highscores.Length; i++)
+            {
+                string next = highscores[i];
+                for (int j = 0; j < bestTen.Length; j++)
+                {
+                    if (bestTen[j] == null)
+                    {
+                        bestTen[j] = next;
+                        break;
+                    }
+                    else
+                    {
+                        int newScore = int.Parse(next.Substring(next.LastIndexOf(" | ") + 2));
+                        int oldScore = int.Parse(bestTen[j].Substring(bestTen[j].LastIndexOf(" | ") + 2));
+                        if (newScore < oldScore)
+                        {
+                            help = bestTen[j];
+                            bestTen[j] = next;
+                            next = help;
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     class Slot
     {
@@ -390,10 +381,5 @@ namespace Memory
         {
             return open;
         }
-
-        
     }
-
-
-
 }
